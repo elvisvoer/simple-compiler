@@ -98,7 +98,6 @@ function emit(s: string): void {
 
 function emitLn(s: string): void {
   emit(s);
-  console.log();
 }
 
 //--------------------------------------------------------------
@@ -131,6 +130,7 @@ function subtract(): void {
   match("-");
   term();
   emitLn("SUB D1,D0");
+  emitLn('NEG D0');
 }
 
 //---------------------------------------------------------------

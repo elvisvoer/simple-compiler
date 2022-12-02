@@ -130,7 +130,7 @@ function subtract(): void {
   match("-");
   term();
   emitLn("SUB D1,D0");
-  emitLn('NEG D0');
+  emitLn("NEG D0");
 }
 
 //---------------------------------------------------------------
@@ -138,17 +138,19 @@ function subtract(): void {
 
 function expression(): void {
   term();
-  emitLn("MOVE D0,D1");
 
-  switch (Look) {
-    case "+":
-      add();
-      break;
-    case "-":
-      subtract();
-      break;
-    default:
-      expected("Addop");
+  while (["+", "-"].includes(Look)) {
+    emitLn("MOVE D0,D1");
+    switch (Look) {
+      case "+":
+        add();
+        break;
+      case "-":
+        subtract();
+        break;
+      default:
+        expected("Addop");
+    }
   }
 }
 

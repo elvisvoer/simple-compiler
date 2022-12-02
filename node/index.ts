@@ -18,7 +18,7 @@ let Look: string; // Lookahead Character
 function getChar() {
   let buffer = Buffer.alloc(1);
   fs.readSync(0, buffer, 0, 1, null);
-  return buffer.toString("utf8");
+  Look = buffer.toString("utf8");
 }
 
 //--------------------------------------------------------------
@@ -60,7 +60,6 @@ function isAlpha(c: string): boolean {
 }
 
 //--------------------------------------------------------------
-
 // Recognize a Decimal Digit
 
 function isDigit(c: string): boolean {
@@ -79,8 +78,12 @@ function getName(): string {
 // Get a Number
 
 function getNum(): string {
-  if (!isDigit(Look)) expected("Integer");
-  return Look;
+  if (!isDigit(Look)) {
+    expected("Integer");
+  }
+  const result = Look;
+  getChar();
+  return result;
 }
 
 //--------------------------------------------------------------
@@ -105,8 +108,53 @@ function init(): void {
   getChar();
 }
 
+//---------------------------------------------------------------
+// Parse and Translate a Math Term
+
+function term(): void {
+  emitLn("MOVE #" + getNum() + ",D0");
+}
+
+//--------------------------------------------------------------
+// Recognize and Translate an Add
+
+function add(): void {
+  match("+");
+  term();
+  emitLn("ADD D1,D0");
+}
+
+//-------------------------------------------------------------
+// Recognize and Translate a Subtract
+
+function subtract(): void {
+  match("-");
+  term();
+  emitLn("SUB D1,D0");
+}
+
+//---------------------------------------------------------------
+// Parse and Translate an Expression
+
+function expression(): void {
+  term();
+  emitLn("MOVE D0,D1");
+
+  switch (Look) {
+    case "+":
+      add();
+      break;
+    case "-":
+      subtract();
+      break;
+    default:
+      expected("Addop");
+  }
+}
+
 //--------------------------------------------------------------
 // Main Program
 
 init();
+expression();
 //--------------------------------------------------------------

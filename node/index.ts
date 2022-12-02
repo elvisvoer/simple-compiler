@@ -120,7 +120,7 @@ function term(): void {
 function add(): void {
   match("+");
   term();
-  emitLn("ADD D1,D0");
+  emitLn("ADD (SP)+,D0");
 }
 
 //-------------------------------------------------------------
@@ -129,7 +129,7 @@ function add(): void {
 function subtract(): void {
   match("-");
   term();
-  emitLn("SUB D1,D0");
+  emitLn("SUB (SP)+,D0");
   emitLn("NEG D0");
 }
 
@@ -140,7 +140,7 @@ function expression(): void {
   term();
 
   while (["+", "-"].includes(Look)) {
-    emitLn("MOVE D0,D1");
+    emitLn("MOVE D0,-(SP)");
     switch (Look) {
       case "+":
         add();

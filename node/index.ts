@@ -48,8 +48,11 @@ function expected(s: string): void {
 // Match a Specific Input Character
 
 function match(x: string): void {
-  if (Look === x) getChar();
-  else expected("''" + x + "''");
+  if (Look === x) {
+    getChar();
+  } else {
+    expected("''" + x + "''");
+  }
 }
 
 //--------------------------------------------------------------
@@ -111,7 +114,13 @@ function init(): void {
 // Parse and Translate a Math Factor
 
 function factor(): void {
-  emitLn("MOVE #" + getNum() + ",D0");
+  if (Look === "(") {
+    match("(");
+    expression();
+    match(")");
+  } else {
+    emitLn("MOVE #" + getNum() + ",D0");
+  }
 }
 
 //--------------------------------------------------------------

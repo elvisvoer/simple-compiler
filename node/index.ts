@@ -108,10 +108,46 @@ function init(): void {
 }
 
 //---------------------------------------------------------------
-// Parse and Translate a Math Term
+// Parse and Translate a Math Factor
+
+function factor(): void {
+  emitLn("MOVE #" + getNum() + ",D0");
+}
+
+//--------------------------------------------------------------
+// Recognize and Translate a Multiply
+
+function multiply(): void {
+  match("*");
+  factor();
+  emitLn("MULS (SP)+,D0");
+}
+
+//--------------------------------------------------------------
+// Recognize and Translate a Divide
+
+function divide(): void {
+  match("/");
+  factor();
+  emitLn("MOVE (SP)+,D1");
+  emitLn("DIVS D1,D0");
+}
 
 function term(): void {
-  emitLn("MOVE #" + getNum() + ",D0");
+  factor();
+  while (["*", "/"].includes(Look)) {
+    emitLn("MOVE D0,-(SP)");
+    switch (Look) {
+      case "*":
+        multiply();
+        break;
+      case "/":
+        divide();
+        break;
+      default:
+        expected("Mulop");
+    }
+  }
 }
 
 //--------------------------------------------------------------
@@ -138,7 +174,6 @@ function subtract(): void {
 
 function expression(): void {
   term();
-
   while (["+", "-"].includes(Look)) {
     emitLn("MOVE D0,-(SP)");
     switch (Look) {

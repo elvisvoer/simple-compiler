@@ -51,7 +51,7 @@ function match(x: string): void {
   if (Look === x) {
     getChar();
   } else {
-    expected("''" + x + "''");
+    expected("'" + x + "'");
   }
 }
 

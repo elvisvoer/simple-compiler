@@ -75,6 +75,15 @@ begin
    IsDigit := c in ['0'..'9'];
 end;
 
+{--------------------------------------------------------------}
+{ Recognize an Addop }
+
+function IsAddop(c: char): boolean;
+begin
+   IsAddop := c in ['+', '-'];
+end;
+{--------------------------------------------------------------}
+
 
 {--------------------------------------------------------------}
 { Get an Identifier }
@@ -205,8 +214,11 @@ end;
 
 procedure Expression;
 begin
-   Term;
-   while Look in ['+', '-'] do begin
+   if IsAddop(Look) then
+      EmitLn('CLR D0')
+   else
+      Term;
+   while IsAddop(Look) do begin
       EmitLn('MOVE D0,-(SP)');
       case Look of
        '+': Add;

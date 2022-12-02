@@ -70,6 +70,13 @@ function isDigit(c: string): boolean {
 }
 
 //--------------------------------------------------------------
+// Recognize an Addop
+
+function isAddop(c: string): boolean {
+  return ["+", "-"].includes(c);
+}
+
+//--------------------------------------------------------------
 // Get an Identifier
 
 function getName(): string {
@@ -182,8 +189,12 @@ function subtract(): void {
 // Parse and Translate an Expression
 
 function expression(): void {
-  term();
-  while (["+", "-"].includes(Look)) {
+  if (isAddop(Look)) {
+    emitLn("CLR D0");
+  } else {
+    term();
+  }
+  while (isAddop(Look)) {
     emitLn("MOVE D0,-(SP)");
     switch (Look) {
       case "+":

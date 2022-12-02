@@ -149,20 +149,22 @@ function divide(): void {
   emitLn("DIVS D1,D0");
 }
 
+//---------------------------------------------------------------
+// Parse and Translate a Term
+
 function term(): void {
   factor();
   while (["*", "/"].includes(Look)) {
     emitLn("MOVE D0,-(SP)");
-    switch (Look) {
-      case "*":
-        multiply();
-        break;
-      case "/":
-        divide();
-        break;
-      default:
-        expected("Mulop");
-    }
+
+    const handler = {
+      "*": multiply,
+      "/": divide,
+    }[Look];
+
+    handler && handler();
+    // error if not Mulop
+    !handler && expected("Mulop");
   }
 }
 
@@ -196,16 +198,15 @@ function expression(): void {
   }
   while (isAddop(Look)) {
     emitLn("MOVE D0,-(SP)");
-    switch (Look) {
-      case "+":
-        add();
-        break;
-      case "-":
-        subtract();
-        break;
-      default:
-        expected("Addop");
-    }
+
+    const handler = {
+      "+": add,
+      "-": subtract,
+    }[Look];
+
+    handler && handler();
+    // error if not Addop
+    !handler && expected("Addop");
   }
 }
 

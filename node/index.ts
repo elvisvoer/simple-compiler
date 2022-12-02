@@ -15,7 +15,7 @@ let Look: string; // Lookahead Character
 //--------------------------------------------------------------
 // Read New Character From Input Stream
 
-function getChar() {
+function getChar(): void {
   let buffer = Buffer.alloc(1);
   fs.readSync(0, buffer, 0, 1, null);
   Look = buffer.toString("utf8");
@@ -24,7 +24,7 @@ function getChar() {
 //--------------------------------------------------------------
 // Report an Error
 
-function error(s: string) {
+function error(s: string): void {
   console.log();
   console.log("Error: ", s, ".");
 }
@@ -32,7 +32,7 @@ function error(s: string) {
 //--------------------------------------------------------------
 // Report Error and Halt
 
-function abort(s: string) {
+function abort(s: string): void {
   error(s);
   process.exit(-1);
 }
@@ -40,14 +40,14 @@ function abort(s: string) {
 //--------------------------------------------------------------
 // Report What Was Expected
 
-function expected(s: string) {
+function expected(s: string): void {
   abort(s + " Expected");
 }
 
 //--------------------------------------------------------------
 // Match a Specific Input Character
 
-function match(x: string) {
+function match(x: string): void {
   if (Look === x) getChar();
   else expected("''" + x + "''");
 }

@@ -177,14 +177,12 @@ function term(): void {
   while (["*", "/"].includes(Look)) {
     emitLn("MOVE D0,-(SP)");
 
-    const handler = {
-      "*": multiply,
-      "/": divide,
-    }[Look];
-
-    handler && handler();
-    // error if not Mulop
-    !handler && expected("Mulop");
+    ((
+      {
+        "*": multiply,
+        "/": divide,
+      }[Look] as Function
+    )());
   }
 }
 
@@ -219,14 +217,12 @@ function expression(): void {
   while (isAddop(Look)) {
     emitLn("MOVE D0,-(SP)");
 
-    const handler = {
-      "+": add,
-      "-": subtract,
-    }[Look];
-
-    handler && handler();
-    // error if not Addop
-    !handler && expected("Addop");
+    ((
+      {
+        "+": add,
+        "-": subtract,
+      }[Look] as Function
+    )());
   }
 }
 

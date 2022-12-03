@@ -80,8 +80,12 @@ function isAddop(c: string): boolean {
 // Get an Identifier
 
 function getName(): string {
-  if (!isAlpha(Look)) expected("Name");
-  return Look.toUpperCase();
+  if (!isAlpha(Look)) {
+    expected("Name");
+  }
+  const result = Look.toUpperCase();
+  getChar();
+  return result;
 }
 
 //--------------------------------------------------------------
@@ -125,6 +129,8 @@ function factor(): void {
     match("(");
     expression();
     match(")");
+  } else if (isAlpha(Look)) {
+    emitLn("MOVE " + getName() + "(PC),D0");
   } else {
     emitLn("MOVE #" + getNum() + ",D0");
   }

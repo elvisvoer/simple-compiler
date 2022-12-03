@@ -144,6 +144,8 @@ begin
       Expression;
       Match(')');
       end
+   else if IsAlpha(Look) then
+      EmitLn('MOVE ' + GetName + '(PC),D0')
    else
       EmitLn('MOVE #' + GetNum + ',D0');
 end;

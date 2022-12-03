@@ -228,12 +228,22 @@ function expression(): void {
 }
 
 //--------------------------------------------------------------
+// Parse and Translate an Assignment Statement
+function assignment(): void {
+  const name = getName();
+  match("=");
+  expression();
+  emitLn("LEA " + name + "(PC),A0");
+  emitLn("MOVE D0,(A0)");
+}
+
+//--------------------------------------------------------------
 // Main Program
 
 init();
-expression();
+assignment();
 // @ts-ignore
 if (Look !== CR) {
-  expected('NewLine');
+  expected("NewLine");
 }
 //--------------------------------------------------------------

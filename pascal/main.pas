@@ -5,7 +5,7 @@ program Cradle;
 { Constant Declarations }
 
 const TAB = ^I;
-CR = ^M;
+CR = LineEnding;
 
 {--------------------------------------------------------------}
 { Variable Declarations }
@@ -215,7 +215,6 @@ begin
    Term;
    EmitLn('ADD (SP)+,D0');
 end;
-{-------------------------------------------------------------}
 
 {-------------------------------------------------------------}
 { Recognize and Translate a Subtract }
@@ -227,7 +226,6 @@ begin
    EmitLn('SUB (SP)+,D0');
    EmitLn('NEG D0');
 end;
-{-------------------------------------------------------------}
 
 {---------------------------------------------------------------}
 { Parse and Translate an Expression }
@@ -247,14 +245,26 @@ begin
       end;
    end;
 end;
+
 {--------------------------------------------------------------}
+{ Parse and Translate an Assignment Statement }
+
+procedure Assignment;
+var Name: char;
+begin
+   Name := GetName;
+   Match('=');
+   Expression;
+   EmitLn('LEA ' + Name + '(PC),A0');
+   EmitLn('MOVE D0,(A0)')
+end;
 
 {--------------------------------------------------------------}
 { Main Program }
 
 begin
    Init;
-   Expression;
+   Assignment;
    if Look <> CR then Expected('Newline');
 end.
 {--------------------------------------------------------------}

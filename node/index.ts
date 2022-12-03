@@ -46,17 +46,6 @@ function expected(s: string): void {
 }
 
 //--------------------------------------------------------------
-// Match a Specific Input Character
-
-function match(x: string): void {
-  if (Look === x) {
-    getChar();
-  } else {
-    expected("'" + x + "'");
-  }
-}
-
-//--------------------------------------------------------------
 // Recognize an Alpha Character
 
 function isAlpha(c: string): boolean {
@@ -78,6 +67,31 @@ function isAlNum(c: string): boolean {
 }
 
 //--------------------------------------------------------------
+// Recognize White Space
+
+function isWhite(c: string): boolean {
+  return [" ", TAB].includes(c);
+}
+
+function skipWhite(): void {
+  while (isWhite(Look)) {
+    getChar();
+  }
+}
+
+//--------------------------------------------------------------
+// Match a Specific Input Character
+
+function match(x: string): void {
+  if (Look !== x) {
+    expected("'" + x + "'");
+  } else {
+    getChar();
+    skipWhite();
+  }
+}
+
+//--------------------------------------------------------------
 // Recognize an Addop
 
 function isAddop(c: string): boolean {
@@ -96,6 +110,7 @@ function getName(): string {
   while (isAlNum(Look)) {
     token += Look.toUpperCase();
     getChar();
+    skipWhite();
   }
 
   return token;
@@ -113,6 +128,7 @@ function getNum(): string {
   while (isDigit(Look)) {
     token += Look;
     getChar();
+    skipWhite();
   }
 
   return token;
@@ -137,6 +153,7 @@ function emitLn(s: string): void {
 
 function init(): void {
   getChar();
+  skipWhite();
 }
 
 //---------------------------------------------------------------

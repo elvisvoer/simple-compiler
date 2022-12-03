@@ -49,16 +49,6 @@ begin
 end;
 
 {--------------------------------------------------------------}
-{ Match a Specific Input Character }
-
-procedure Match(x: char);
-begin
-   if Look = x then GetChar
-   else Expected('''' + x + '''');
-end;
-
-
-{--------------------------------------------------------------}
 { Recognize an Alpha Character }
 
 function IsAlpha(c: char): boolean;
@@ -83,13 +73,41 @@ begin
 end;
 
 {--------------------------------------------------------------}
+{ Recognize White Space }
+
+function IsWhite(c: char): boolean;
+begin
+   IsWhite := c in [' ', TAB];
+end;
+
+{--------------------------------------------------------------}
 { Recognize an Addop }
 
 function IsAddop(c: char): boolean;
 begin
    IsAddop := c in ['+', '-'];
 end;
+
 {--------------------------------------------------------------}
+{ Skip Over Leading White Space }
+
+procedure SkipWhite;
+begin
+   while IsWhite(Look) do
+      GetChar;
+end;
+
+{--------------------------------------------------------------}
+{ Match a Specific Input Character }
+
+procedure Match(x: char);
+begin
+   if Look <> x then Expected('''' + x + '''')
+   else begin
+      GetChar;
+      SkipWhite;
+   end;
+end;
 
 
 {--------------------------------------------------------------}
@@ -105,6 +123,7 @@ begin
       GetChar;
    end;
    GetName := Token;
+   SkipWhite;
 end;
 
 
@@ -121,6 +140,7 @@ begin
       GetChar;
    end;
    GetNum := Value;
+   SkipWhite;
 end;
 {--------------------------------------------------------------}
 
@@ -148,6 +168,7 @@ end;
 procedure Init;
 begin
    GetChar;
+   SkipWhite;
 end;
 
 { Forward declaration }

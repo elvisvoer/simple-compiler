@@ -132,10 +132,27 @@ begin
    GetChar;
 end;
 
+{ Forward declaration }
+procedure Expression; Forward;
+
+{---------------------------------------------------------------}
+{ Parse and Translate an Identifier }
+
+procedure Ident;
+var Name: char;
+begin
+   Name := GetName;
+   if Look = '(' then begin
+      Match('(');
+      Match(')');
+      EmitLn('BSR ' + Name);
+      end
+   else
+      EmitLn('MOVE ' + Name + '(PC),D0')
+end;
+
 {---------------------------------------------------------------}
 { Parse and Translate a Math Factor }
-
-procedure Expression; Forward;
 
 procedure Factor;
 begin
@@ -145,7 +162,7 @@ begin
       Match(')');
       end
    else if IsAlpha(Look) then
-      EmitLn('MOVE ' + GetName + '(PC),D0')
+      Ident
    else
       EmitLn('MOVE #' + GetNum + ',D0');
 end;

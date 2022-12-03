@@ -122,6 +122,20 @@ function init(): void {
 }
 
 //---------------------------------------------------------------
+// Parse and Translate an Identifier
+
+function ident(): void {
+  const name = getName();
+  if (Look === "(") {
+    match("(");
+    match(")");
+    emitLn("BSR " + name);
+  } else {
+    emitLn("MOVE " + name + "(PC),D0");
+  }
+}
+
+//---------------------------------------------------------------
 // Parse and Translate a Math Factor
 
 function factor(): void {
@@ -130,7 +144,7 @@ function factor(): void {
     expression();
     match(")");
   } else if (isAlpha(Look)) {
-    emitLn("MOVE " + getName() + "(PC),D0");
+    ident();
   } else {
     emitLn("MOVE #" + getNum() + ",D0");
   }

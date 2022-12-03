@@ -6,6 +6,7 @@ import fs from "fs";
 // Constant Declarations
 
 const TAB = "\t";
+const CR = "\n";
 
 //--------------------------------------------------------------
 // Variable Declarations
@@ -231,4 +232,8 @@ function expression(): void {
 
 init();
 expression();
+// @ts-ignore
+if (Look !== CR) {
+  expected('NewLine');
+}
 //--------------------------------------------------------------

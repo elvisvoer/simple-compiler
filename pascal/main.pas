@@ -5,6 +5,7 @@ program Cradle;
 { Constant Declarations }
 
 const TAB = ^I;
+CR = ^M;
 
 {--------------------------------------------------------------}
 { Variable Declarations }
@@ -254,5 +255,6 @@ end;
 begin
    Init;
    Expression;
+   if Look <> CR then Expected('Newline');
 end.
 {--------------------------------------------------------------}

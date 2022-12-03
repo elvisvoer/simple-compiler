@@ -65,15 +65,21 @@ function IsAlpha(c: char): boolean;
 begin
    IsAlpha := upcase(c) in ['A'..'Z'];
 end;
-                              
 
 {--------------------------------------------------------------}
-
 { Recognize a Decimal Digit }
 
 function IsDigit(c: char): boolean;
 begin
    IsDigit := c in ['0'..'9'];
+end;
+
+{--------------------------------------------------------------}
+{ Recognize an Alphanumeric }
+
+function IsAlNum(c: char): boolean;
+begin
+   IsAlNum := IsAlpha(c) or IsDigit(c);
 end;
 
 {--------------------------------------------------------------}
@@ -89,23 +95,34 @@ end;
 {--------------------------------------------------------------}
 { Get an Identifier }
 
-function GetName: char;
+function GetName: string;
+var Token: string;
 begin
+   Token := '';
    if not IsAlpha(Look) then Expected('Name');
-   GetName := UpCase(Look);
-   GetChar;
+   while IsAlNum(Look) do begin
+      Token := Token + UpCase(Look);
+      GetChar;
+   end;
+   GetName := Token;
 end;
 
 
 {--------------------------------------------------------------}
 { Get a Number }
 
-function GetNum: char;
+function GetNum: string;
+var Value: string;
 begin
+   Value := '';
    if not IsDigit(Look) then Expected('Integer');
-   GetNum := Look;
-   GetChar;
+   while IsDigit(Look) do begin
+      Value := Value + Look;
+      GetChar;
+   end;
+   GetNum := Value;
 end;
+{--------------------------------------------------------------}
 
 
 {--------------------------------------------------------------}
@@ -140,7 +157,7 @@ procedure Expression; Forward;
 { Parse and Translate an Identifier }
 
 procedure Ident;
-var Name: char;
+var Name: string;
 begin
    Name := GetName;
    if Look = '(' then begin
@@ -250,7 +267,7 @@ end;
 { Parse and Translate an Assignment Statement }
 
 procedure Assignment;
-var Name: char;
+var Name: string;
 begin
    Name := GetName;
    Match('=');

@@ -71,6 +71,13 @@ function isDigit(c: string): boolean {
 }
 
 //--------------------------------------------------------------
+// Recognize an alphanumeric input
+
+function isAlNum(c: string): boolean {
+  return isAlpha(c) || isDigit(c);
+}
+
+//--------------------------------------------------------------
 // Recognize an Addop
 
 function isAddop(c: string): boolean {
@@ -81,24 +88,34 @@ function isAddop(c: string): boolean {
 // Get an Identifier
 
 function getName(): string {
+  let token = "";
   if (!isAlpha(Look)) {
     expected("Name");
   }
-  const result = Look.toUpperCase();
-  getChar();
-  return result;
+
+  while (isAlNum(Look)) {
+    token += Look.toUpperCase();
+    getChar();
+  }
+
+  return token;
 }
 
 //--------------------------------------------------------------
 // Get a Number
 
 function getNum(): string {
+  let token = "";
   if (!isDigit(Look)) {
     expected("Integer");
   }
-  const result = Look;
-  getChar();
-  return result;
+
+  while (isDigit(Look)) {
+    token += Look;
+    getChar();
+  }
+
+  return token;
 }
 
 //--------------------------------------------------------------

@@ -11,6 +11,17 @@ CR = LineEnding;
 { Variable Declarations }
 
 var Look: char;              { Lookahead Character }
+Table: Array['A'..'Z'] of integer;
+
+{---------------------------------------------------------------}
+{ Initialize the Variable Area }
+
+procedure InitTable;
+var i: char;
+begin
+   for i := 'A' to 'Z' do
+      Table[i] := 0;
+end;
                               
 {--------------------------------------------------------------}
 { Read New Character From Input Stream }
@@ -57,6 +68,15 @@ begin
    else Expected('''' + x + '''');
 end;
 
+{--------------------------------------------------------------}
+{ Recognize and Skip Over a Newline }
+
+procedure NewLine;
+begin
+   if Look = CR then begin
+      GetChar;
+   end;
+end;
 
 {--------------------------------------------------------------}
 { Recognize an Alpha Character }
@@ -134,6 +154,7 @@ end;
 
 procedure Init;
 begin
+   InitTable;
    GetChar;
 end;
 
@@ -165,6 +186,8 @@ begin
       Factor := Expression;
       Match(')');
       end
+   else if IsAlpha(Look) then
+      Factor := Table[GetName]
    else
        Factor := GetNum;
 end;
@@ -224,9 +247,26 @@ var Name: char;
 begin
    Name := GetName;
    Match('=');
-   Expression;
-   EmitLn('LEA ' + Name + '(PC),A0');
-   EmitLn('MOVE D0,(A0)')
+   Table[Name] := Expression;
+end;
+
+{--------------------------------------------------------------}
+{ Input Routine }
+
+procedure Input;
+begin
+   Match('?');
+   Read(Table[GetName]);
+end;
+
+
+{--------------------------------------------------------------}
+{ Output Routine }
+
+procedure Output;
+begin
+   Match('!');
+   WriteLn(Table[GetName]);
 end;
 
 {--------------------------------------------------------------}
@@ -234,7 +274,13 @@ end;
 
 begin
    Init;
-   WriteLn(Expression);
-   if Look <> CR then Expected('Newline');
+   repeat
+      case Look of
+       '?': Input;
+       '!': Output;
+       else Assignment;
+      end;
+      NewLine;
+   until Look = '.';
 end.
 {--------------------------------------------------------------}

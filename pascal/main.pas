@@ -100,13 +100,17 @@ end;
 {--------------------------------------------------------------}
 { Get a Number }
 
-function GetNum: char;
+function GetNum: integer;
+var Value: integer;
 begin
+   Value := 0;
    if not IsDigit(Look) then Expected('Integer');
-   GetNum := Look;
-   GetChar;
+   while IsDigit(Look) do begin
+      Value := 10 * Value + Ord(Look) - Ord('0');
+      GetChar;
+   end;
+   GetNum := Value;
 end;
-
 
 {--------------------------------------------------------------}
 { Output a String with Tab }
@@ -133,9 +137,6 @@ begin
    GetChar;
 end;
 
-{ Forward declaration }
-procedure Expression; Forward;
-
 {---------------------------------------------------------------}
 { Parse and Translate an Identifier }
 
@@ -155,95 +156,64 @@ end;
 {---------------------------------------------------------------}
 { Parse and Translate a Math Factor }
 
-procedure Factor;
+function Expression: integer; Forward;
+
+function Factor: integer;
 begin
    if Look = '(' then begin
       Match('(');
-      Expression;
+      Factor := Expression;
       Match(')');
       end
-   else if IsAlpha(Look) then
-      Ident
    else
-      EmitLn('MOVE #' + GetNum + ',D0');
-end;
-
-{--------------------------------------------------------------}
-{ Recognize and Translate a Multiply }
-
-procedure Multiply;
-begin
-   Match('*');
-   Factor;
-   EmitLn('MULS (SP)+,D0');
-end;
-
-{-------------------------------------------------------------}
-{ Recognize and Translate a Divide }
-
-procedure Divide;
-begin
-   Match('/');
-   Factor;
-   EmitLn('MOVE (SP)+,D1');
-   EmitLn('DIVS D1,D0');
+       Factor := GetNum;
 end;
 
 {---------------------------------------------------------------}
 { Parse and Translate a Math Term }
 
-procedure Term;
+function Term: integer;
+var Value: integer;
 begin
-   Factor;
+   Value := Factor;
    while Look in ['*', '/'] do begin
-      EmitLn('MOVE D0,-(SP)');
       case Look of
-       '*': Multiply;
-       '/': Divide;
-      else Expected('Mulop');
+       '*': begin
+               Match('*');
+               Value := Value * Factor;
+            end;
+       '/': begin
+               Match('/');
+               Value := Value div Factor;
+            end;
       end;
    end;
-end;
-
-
-{--------------------------------------------------------------}
-{ Recognize and Translate an Add }
-
-procedure Add;
-begin
-   Match('+');
-   Term;
-   EmitLn('ADD (SP)+,D0');
-end;
-
-{-------------------------------------------------------------}
-{ Recognize and Translate a Subtract }
-
-procedure Subtract;
-begin
-   Match('-');
-   Term;
-   EmitLn('SUB (SP)+,D0');
-   EmitLn('NEG D0');
+   Term := Value;
 end;
 
 {---------------------------------------------------------------}
 { Parse and Translate an Expression }
 
-procedure Expression;
+function Expression: integer;
+var Value: integer;
 begin
    if IsAddop(Look) then
-      EmitLn('CLR D0')
+      Value := 0
    else
-      Term;
+      Value := Term;
    while IsAddop(Look) do begin
-      EmitLn('MOVE D0,-(SP)');
       case Look of
-       '+': Add;
-       '-': Subtract;
-      else Expected('Addop');
+       '+': begin
+               Match('+');
+               Value := Value + Term;
+            end;
+       '-': begin
+               Match('-');
+               Value := Value - Term;
+            end;
       end;
    end;
+   Expression := Value;
 end;
 
 {--------------------------------------------------------------}
@@ -264,7 +234,7 @@ end;
 
 begin
    Init;
-   Assignment;
+   WriteLn(Expression);
    if Look <> CR then Expected('Newline');
 end.
 {--------------------------------------------------------------}

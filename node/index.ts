@@ -12,6 +12,13 @@ const CR = "\n";
 // Variable Declarations
 
 let Look: string; // Lookahead Character
+const Table = "abcdefghijklmnopqrstuvwxyz"
+  .toLocaleUpperCase()
+  .split("")
+  .reduce((obj, l) => {
+    obj[l] = 0;
+    return obj;
+  }, {} as any);
 
 //--------------------------------------------------------------
 // Read New Character From Input Stream
@@ -53,6 +60,12 @@ function match(x: string): void {
     getChar();
   } else {
     expected("'" + x + "'");
+  }
+}
+
+function newLine(): void {
+  if (Look === CR) {
+    getChar();
   }
 }
 
@@ -151,6 +164,8 @@ function factor(): number {
     match("(");
     value = expression();
     match(")");
+  } else if (isAlpha(Look)) {
+    value = Table(getName());
   } else {
     value = getNum();
   }
@@ -213,18 +228,32 @@ function expression(): number {
 function assignment(): void {
   const name = getName();
   match("=");
-  expression();
-  emitLn("LEA " + name + "(PC),A0");
-  emitLn("MOVE D0,(A0)");
+  Table[name] = expression();
+}
+
+//--------------------------------------------------------------
+// Output Routine
+
+function output(): void {
+  match("!");
+  console.log(Table[getName()]);
 }
 
 //--------------------------------------------------------------
 // Main Program
 
 init();
+do {
+  ((
+    {
+      "!": output,
+      // @ts-ignore
+    }[Look] || assignment
+  )());
+  newLine();
+  // @ts-ignore
+} while (Look !== ".");
+
 console.log(expression());
-// @ts-ignore
-if (Look !== CR) {
-  expected("NewLine");
-}
+
 //--------------------------------------------------------------

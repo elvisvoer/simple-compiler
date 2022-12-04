@@ -92,13 +92,18 @@ function getName(): string {
 //--------------------------------------------------------------
 // Get a Number
 
-function getNum(): string {
+function getNum(): number {
+  let value = 0;
   if (!isDigit(Look)) {
     expected("Integer");
   }
-  const result = Look;
-  getChar();
-  return result;
+
+  while (isDigit(Look)) {
+    value = value * 10 + parseInt(Look, 10);
+    getChar();
+  }
+
+  return value;
 }
 
 //--------------------------------------------------------------
@@ -139,92 +144,68 @@ function ident(): void {
 //---------------------------------------------------------------
 // Parse and Translate a Math Factor
 
-function factor(): void {
+function factor(): number {
+  let value: number;
+
   if (Look === "(") {
     match("(");
-    expression();
+    value = expression();
     match(")");
-  } else if (isAlpha(Look)) {
-    ident();
   } else {
-    emitLn("MOVE #" + getNum() + ",D0");
+    value = getNum();
   }
-}
 
-//--------------------------------------------------------------
-// Recognize and Translate a Multiply
-
-function multiply(): void {
-  match("*");
-  factor();
-  emitLn("MULS (SP)+,D0");
-}
-
-//--------------------------------------------------------------
-// Recognize and Translate a Divide
-
-function divide(): void {
-  match("/");
-  factor();
-  emitLn("MOVE (SP)+,D1");
-  emitLn("DIVS D1,D0");
+  return value;
 }
 
 //---------------------------------------------------------------
 // Parse and Translate a Term
 
-function term(): void {
-  factor();
+function term(): number {
+  let value = factor();
   while (["*", "/"].includes(Look)) {
-    emitLn("MOVE D0,-(SP)");
-
     ((
       {
-        "*": multiply,
-        "/": divide,
+        "*": () => {
+          match("*");
+          value = value * factor();
+        },
+        "/": () => {
+          match("/");
+          value = value / factor();
+        },
       }[Look] as Function
     )());
   }
-}
-
-//--------------------------------------------------------------
-// Recognize and Translate an Add
-
-function add(): void {
-  match("+");
-  term();
-  emitLn("ADD (SP)+,D0");
-}
-
-//-------------------------------------------------------------
-// Recognize and Translate a Subtract
-
-function subtract(): void {
-  match("-");
-  term();
-  emitLn("SUB (SP)+,D0");
-  emitLn("NEG D0");
+  return value;
 }
 
 //---------------------------------------------------------------
 // Parse and Translate an Expression
 
-function expression(): void {
+function expression(): number {
+  let value: number;
   if (isAddop(Look)) {
-    emitLn("CLR D0");
+    value = 0;
   } else {
-    term();
+    value = term();
   }
   while (isAddop(Look)) {
-    emitLn("MOVE D0,-(SP)");
-
     ((
       {
-        "+": add,
-        "-": subtract,
+        "+": () => {
+          match("+");
+          value = value + term();
+        },
+        "-": () => {
+          match("-");
+          value = value - term();
+        },
       }[Look] as Function
     )());
   }
+
+  return value;
 }
 
 //--------------------------------------------------------------
@@ -241,7 +222,7 @@ function assignment(): void {
 // Main Program
 
 init();
-assignment();
+console.log(expression());
 // @ts-ignore
 if (Look !== CR) {
   expected("NewLine");

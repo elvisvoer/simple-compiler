@@ -165,7 +165,7 @@ function factor(): number {
     value = expression();
     match(")");
   } else if (isAlpha(Look)) {
-    value = Table(getName());
+    value = Table[getName()];
   } else {
     value = getNum();
   }

@@ -60,15 +60,6 @@ begin
 end;
 
 {--------------------------------------------------------------}
-{ Match a Specific Input Character }
-
-procedure Match(x: char);
-begin
-   if Look = x then GetChar
-   else Expected('''' + x + '''');
-end;
-
-{--------------------------------------------------------------}
 { Recognize and Skip Over a Newline }
 
 procedure NewLine;
@@ -97,13 +88,41 @@ begin
 end;
 
 {--------------------------------------------------------------}
+{ Recognize White Space }
+
+function IsWhite(c: char): boolean;
+begin
+   IsWhite := c in [' ', TAB];
+end;
+
+{--------------------------------------------------------------}
 { Recognize an Addop }
 
 function IsAddop(c: char): boolean;
 begin
    IsAddop := c in ['+', '-'];
 end;
+
 {--------------------------------------------------------------}
+{ Skip Over Leading White Space }
+
+procedure SkipWhite;
+begin
+   while IsWhite(Look) do
+      GetChar;
+end;
+
+{--------------------------------------------------------------}
+{ Match a Specific Input Character }
+
+procedure Match(x: char);
+begin
+   if Look <> x then Expected('''' + x + '''')
+   else begin
+      GetChar;
+      SkipWhite;
+   end;
+end;
 
 
 {--------------------------------------------------------------}
@@ -114,6 +133,7 @@ begin
    if not IsAlpha(Look) then Expected('Name');
    GetName := UpCase(Look);
    GetChar;
+   SkipWhite;
 end;
 
 
@@ -128,6 +148,7 @@ begin
    while IsDigit(Look) do begin
       Value := 10 * Value + Ord(Look) - Ord('0');
       GetChar;
+      SkipWhite;
    end;
    GetNum := Value;
 end;
@@ -156,6 +177,7 @@ procedure Init;
 begin
    InitTable;
    GetChar;
+   SkipWhite;
 end;
 
 {---------------------------------------------------------------}

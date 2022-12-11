@@ -5,7 +5,7 @@ program Branch;
 { Constant Declarations }
 
 const TAB = ^I;
-      CR  = ^M;
+      CR  = LineEnding;
 
 
 {--------------------------------------------------------------}
@@ -137,6 +137,14 @@ begin
 end;
 
 {--------------------------------------------------------------}
+{ Skip a CRLF }
+
+procedure Fin;
+begin
+   if Look = CR then GetChar;
+end;
+
+{--------------------------------------------------------------}
 { Get an Identifier }
 
 function GetName: char;
@@ -190,14 +198,6 @@ procedure EmitLn(s: string);
 begin
    Emit(s);
    WriteLn;
-end;
-
-{--------------------------------------------------------------}
-{ Parse and Translate a Boolean Condition }
-
-procedure Condition;
-begin
-   EmitLn('<condition>');
 end;
 
 {---------------------------------------------------------------}
@@ -480,7 +480,7 @@ procedure DoIf(L: string);
 var L1, L2: string;
 begin
    Match('i');
-   Condition;
+   BoolExpression;
    L1 := NewLabel;
    L2 := L1;
    EmitLn('BEQ ' + L1);
@@ -507,7 +507,7 @@ begin
    L1 := NewLabel;
    L2 := NewLabel;
    PostLabel(L1);
-   Condition;
+   BoolExpression;
    EmitLn('BEQ ' + L2);
    Block(L2);
    Match('e');
@@ -545,7 +545,7 @@ begin
    PostLabel(L1);
    Block(L2);
    Match('u');
-   Condition;
+   BoolExpression;
    EmitLn('BEQ ' + L1);
    PostLabel(L2);
 end;
@@ -614,11 +614,16 @@ begin
 end;
 
 {--------------------------------------------------------------}
-{ Recognize and Translate an "Other" }
+{ Parse and Translate an Assignment Statement }
 
-procedure Other;
+procedure Assignment;
+var Name: char;
 begin
-   EmitLn(GetName);
+   Name := GetName;
+   Match('=');
+   BoolExpression;
+   EmitLn('LEA ' + Name + '(PC),A0');
+   EmitLn('MOVE D0,(A0)');
 end;
 
 {--------------------------------------------------------------}
@@ -627,6 +632,7 @@ end;
 procedure Block(L: string);
 begin
    while not(Look in ['e', 'l', 'u']) do begin
+      Fin;
       case Look of
        'i': DoIf(L);
        'w': DoWhile;
@@ -635,9 +641,10 @@ begin
        'f': DoFor;
        'd': DoDo;
        'b': DoBreak(L);
-       else Other;
+       else Assignment;
       end;
-   end;
+      Fin;
+ end;
 end;
 
 {--------------------------------------------------------------}
@@ -664,6 +671,6 @@ end;
 
 begin
    Init;
-   BoolExpression;
+   DoProgram;
 end.
 {--------------------------------------------------------------}

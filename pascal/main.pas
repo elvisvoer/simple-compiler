@@ -11,6 +11,7 @@ CR = LineEnding;
 { Variable Declarations }
 
 var Look: char;              { Lookahead Character }
+Token: string;
                               
 {--------------------------------------------------------------}
 { Read New Character From Input Stream }
@@ -89,6 +90,22 @@ begin
 end;
 
 {--------------------------------------------------------------}
+{ Recognize Any Operator }
+
+function IsOp(c: char): boolean;
+begin
+   IsOp := c in ['+', '-', '*', '/', '<', '>', ':', '='];
+end;
+
+{--------------------------------------------------------------}
+{ Skip a CRLF }
+
+procedure Fin;
+begin
+   if Look = CR then GetChar;
+end;
+
+{--------------------------------------------------------------}
 { Skip Over Leading White Space }
 
 procedure SkipWhite;
@@ -142,7 +159,22 @@ begin
    GetNum := Value;
    SkipWhite;
 end;
+
 {--------------------------------------------------------------}
+{ Get an Operator }
+
+function GetOp: string;
+var Value: string;
+begin
+   Value := '';
+   if not IsOp(Look) then Expected('Operator');
+   while IsOp(Look) do begin
+     Value := Value + Look;
+     GetChar;
+   end;
+   GetOp := Value;
+   SkipWhite;
+end;
 
 
 {--------------------------------------------------------------}
@@ -298,11 +330,34 @@ begin
 end;
 
 {--------------------------------------------------------------}
+{ Lexical Scanner }
+
+Function Scan: string;
+begin
+   while Look = CR do
+      Fin;
+   if IsAlpha(Look) then
+      Scan := GetName
+   else if IsDigit(Look) then
+      Scan := GetNum
+   else if IsOp(Look) then
+      Scan := GetOp
+   else begin
+      Scan := Look;
+      GetChar;
+   end;
+   SkipWhite;
+end;
+
+{--------------------------------------------------------------}
 { Main Program }
 
 begin
    Init;
-   Assignment;
-   if Look <> CR then Expected('Newline');
+   repeat
+      Token := Scan;
+      writeln(Token);
+      if Token = CR then Fin;
+   until Token = '.';
 end.
 {--------------------------------------------------------------}
